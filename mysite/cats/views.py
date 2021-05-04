@@ -1,26 +1,24 @@
-from django.shortcuts import render
-from django.views import View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 
 from cats.models import Cat, Breed
 # Create your views here.
 
-class MainView(LoginRequiredMixin, View):
-    def get(self, request):
-        bc = Breed.objects.all().count()
-        cl = Cat.objects.all()
+class MainView(LoginRequiredMixin, ListView):
+    model = Cat
 
-        ctx = {'breed_count': bc, 'cat_list': cl}
-        return render(request, 'cats/cat_list.html', ctx)
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in a QuerySet of all the breeds count
+        context['breed_count'] = Breed.objects.all().count()
+        return context
 
 
-class BreedView(LoginRequiredMixin, View):
-    def get(self, request):
-        bl = Breed.objects.all()
-        ctx = {'breed_list': bl}
-        return render(request, 'cats/breed_list.html', ctx)
+class BreedView(LoginRequiredMixin, ListView):
+    model = Breed
 
 
 class CatCreate(LoginRequiredMixin, CreateView):
